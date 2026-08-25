@@ -12,16 +12,16 @@ p.subtitle{text-align:center;font-size:14px;color:#666;margin-bottom:24px}
 .category{margin-bottom:28px}
 .category h2{font-size:17px;font-weight:600;margin-bottom:12px;color:#1a1a2e;border-bottom:2px solid #1a1a2e;padding-bottom:6px;display:inline-block}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
-.card{background:#fff;border-radius:12px;padding:14px;cursor:pointer;border:1px solid #e5e5e7;transition:transform .15s ease,box-shadow .15s ease}
+.card{background:#fff;border-radius:12px;padding:14px;cursor:pointer;border:1px solid #e5e5e7;transition:transform .15s ease,box-shadow .15s ease;overflow:hidden}
 .card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.1)}
-.card-img{width:100%;height:140px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:10px;background-size:cover;background-position:center}
+.card-img{width:100%;height:140px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:10px;background-size:cover;background-position:center;background-repeat:no-repeat}
 .card-name{font-size:14px;font-weight:600;margin-bottom:4px;color:#1a1a2e}
 .card-price{font-size:15px;color:#333;font-variant-numeric:tabular-nums;font-weight:500}
 
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;align-items:center;justify-content:center;padding:16px}
 .modal-card{background:#fff;border-radius:16px;max-width:380px;width:100%;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.2);transform:scale(.95);opacity:0;transition:transform .2s ease,opacity .2s ease}
 .modal-card.active{transform:scale(1);opacity:1}
-.modal-img{height:220px;display:flex;align-items:center;justify-content:center;font-size:72px}
+.modal-img{height:220px;display:flex;align-items:center;justify-content:center;font-size:72px;background-size:cover;background-position:center;background-repeat:no-repeat}
 .modal-body{padding:20px}
 .modal-title{font-size:19px;font-weight:600;margin-bottom:6px;color:#1a1a2e}
 .modal-desc{font-size:14px;color:#555;line-height:1.6;margin-bottom:16px}
@@ -61,7 +61,7 @@ const menu = {
     {name:"Sebzeli",price:"195 ₺",desc:"Mantar, biber, domates, zeytin, mozzarella",icon:"🍕",grad:"#4ECDC4,#FF6B6B"}
   ],
   "Hamburgerler": [
-    {name:"Cheeseburger",price:"175 ₺",desc:"150gr dana köfte, cheddar peyniri, marul, domates, özel sos",icon:"",img: "cheeseburger.webp",grad:"#FF8E53,#6C757D"},
+    {name:"Cheeseburger",price:"175 ₺",desc:"150gr dana köfte, cheddar peyniri, marul, domates, özel sos",icon:"🍔",img:"cheeseburger.webp",grad:"#FF8E53,#6C757D"},
     {name:"Tavuk Burger",price:"160 ₺",desc:"Çıtır tavuk, coleslaw, turşu, burger sosu",icon:"🍔",grad:"#FF6B6B,#4ECDC4"},
     {name:"Mushroom Swiss",price:"190 ₺",desc:"Karamelize mantar, swiss peyniri, truffle mayonez",icon:"🍔",grad:"#6C757D,#FF8E53"}
   ],
@@ -104,7 +104,10 @@ Object.entries(menu).forEach(([cat,items])=>{
   const grid = sec.querySelector('.grid');
   items.forEach(item=>{
     const card = document.createElement('div'); card.className='card';
-    card.innerHTML = `<div class="card-img" style="background:linear-gradient(135deg,${item.grad});${item.img ? `background-image:url('${item.img}')` : ''}">${item.icon}</div><div class="card-name">${item.name}</div><div class="card-price">${item.price}</div>`;
+    const bgStyle = item.img 
+      ? `background-image:url('${item.img}');background-color:#f0f0f0;` 
+      : `background:linear-gradient(135deg,${item.grad});`;
+    card.innerHTML = `<div class="card-img" style="${bgStyle}">${item.icon || ''}</div><div class="card-name">${item.name}</div><div class="card-price">${item.price}</div>`;
     card.onclick = ()=>openModal(item);
     grid.appendChild(card);
   });
@@ -114,14 +117,26 @@ Object.entries(menu).forEach(([cat,items])=>{
 function openModal(item){
   const overlay = document.getElementById('modal-overlay');
   const card = document.getElementById('modal-card');
-  document.getElementById('modal-img').style.background = `linear-gradient(135deg,${item.grad})`;
-  document.getElementById('modal-img').textContent = item.icon;
+  const modalImg = document.getElementById('modal-img');
+  
+  if(item.img){
+    modalImg.style.backgroundImage = `url('${item.img}')`;
+    modalImg.style.background = `linear-gradient(135deg,${item.grad})`;
+    modalImg.style.backgroundImage = `url('${item.img}')`;
+    modalImg.textContent = '';
+  } else {
+    modalImg.style.backgroundImage = '';
+    modalImg.style.background = `linear-gradient(135deg,${item.grad})`;
+    modalImg.textContent = item.icon;
+  }
+  
   document.getElementById('modal-title').textContent = item.name;
   document.getElementById('modal-desc').textContent = item.desc;
   document.getElementById('modal-price').textContent = item.price;
   overlay.style.display = 'flex';
   requestAnimationFrame(()=>card.classList.add('active'));
 }
+
 function closeModal(e){
   if(e && e.target !== e.currentTarget) return;
   const card = document.getElementById('modal-card');
